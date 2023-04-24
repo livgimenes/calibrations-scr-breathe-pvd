@@ -9,9 +9,7 @@ import datetime
 import urllib
 import numpy as np
 
-##### Ref data prep
-
-values_df = pd.read_csv("CO_Lookup_2023_03_13.csv")
+##### Preparing reference data
 
 #global variables
 B0 = 0.0355374 
@@ -19,24 +17,21 @@ A1 = 0.0019875
 A2  = 2.5575529 
 A3 = -0.0542801 
 
-locations_df = pd.read_csv("breathe_providence_sensors.csv")
+# reference df 
+ref_df = pd.read_csv("co_lookup_with_sensors.csv")
+print(list(ref_df["Node ID"]))
 
-#merge with the other grace data to get the node ids and locations
-ref_df = pd.merge(values_df, locations_df, on='Location')
+# pre-processing, drop null rows
+ref_df = ref_df.dropna(subset=['Node ID'])
+ref_df["Node ID"] = ref_df["Node ID"].apply(lambda x: str(x)[0:3])
 
-#drop unecessary columns, note curr droping lat and log
-ref_df = ref_df.drop(['Height in stories (approx)','Height in meters (approx)', 'Installation Date','Latitude','Longitude','Name'], axis=1)
 
 print(ref_df)
 
-print(ref_df.head())
-print(ref_df.columns)
 
-#convert to csv 
-ref_df.to_csv("ref_df.csv")
+###### Fetching helpers
 
 
-### Fetch the data from the server
 def get_requests(node_name, node_id, variable, start_date, start_time, end_date, end_time):
     """Given a node_id, measure, start date and end date return the raw cvs files for that node """
 
@@ -55,11 +50,12 @@ def get_requests_for_row(row, start_date, end_date, variable, start_time, end_ti
     """Helper for get_data. Gets requets for a given row, for a pre-defined start-date, end-date, pollution variant and time """
 
 
-    url = get_requests(urllib.parse.quote(row["Location"]), row["Node ID"], variable, start_date, start_time, end_date, end_time)
+    url = get_requests(row["Name"], row["Node ID"], variable, start_date, start_time, end_date, end_time)
     try:
         data = pd.read_csv(url)
     except:
         data = pd.DataFrame()
+        print(row["Node ID"])
         print(f"An error occurred while trying to fetch data from the server for node " + str(row["Node ID"]) + " at " + row["Location"])
         print("This is the url: " + url)
     return data
@@ -93,7 +89,7 @@ def pst_to_est(time):
   #convert it to a time date module 
   date = datetime.datetime.strptime(time,"%Y-%m-%d %H:%M:%S")
 
-  date = date.astimezone(timezone('US/Pacific'))
+  date = date.astimezone(timezone('US/Eastern'))
   return date
 
 def clean_data(data):
@@ -102,14 +98,16 @@ def clean_data(data):
 
   print(data)
   #drop unecessary columns
-  data = data.drop(columns=['epoch', 'local_timestamp',"node_file_id",'Ref Dates',])
+  data = data.drop(columns=['epoch',"node_file_id"])
 
   #remove missing data, -999
   data = data.replace({'co_wrk_aux': {-999.00000: np.NaN}})
-  data = data.dropna(subset=['datetime', 'co_wrk_aux'])
+  data = data.dropna(subset=['local_timestamp', 'co_wrk_aux'])
 
-  #change time zones 
-  data['datetime'] = data['datetime'].map(lambda x: pst_to_est(x))
+  #TODO: not best practice, check if it's working
+  # change time zones 
+  data['datetime'] = data['local_timestamp'].map(lambda x: pst_to_est(x))
+  data = data.drop(columns=['local_timestamp'])
 
   return data
 
@@ -127,16 +125,30 @@ end_time = str(curr_time)[11:19]
 variable = "co_wrk_aux,temp"
 
 #getting the data
-# data_df = get_data(ref_df, start_date, end_date, variable, start_time, end_time)
+data_df = get_data(ref_df, start_date, end_date, variable, start_time, end_time)
 
-# #rename node_id to Node ID
-# data_df = data_df.rename(columns={"node_id": "Node ID"})
+print(type(data_df))
+print(data_df.columns)
 
-# #merge the data with the reference to get lookup values
-# main_df = pd.merge(data_df, ref_df, on='Node ID')
-# main_df = clean_data(main_df)
-# print(main_df)
-# print(main_df.columns)
+
+#rename node_id to Node ID
+data_df = data_df.rename(columns={"node_id": "Node ID"})
+data_df["Node ID"] = data_df["Node ID"].astype(int)
+ref_df["Node ID"] = ref_df["Node ID"].astype(int)
+
+print(data_df)
+data_df = clean_data(data_df)
+
+
+
+#merge the data with the reference to get lookup values
+main_df = pd.merge(ref_df, data_df, on='Node ID')
+main_df.to_csv("main_df.csv")
+
+#main_df = main_df.to_frame()
+print("this is the tpe for main_df")
+print(main_df.columns)
+print(type(main_df))
 
 
 ### For every sensor generate:  co_wrk_aux_ref(SensorXX) = $intercept$ + $slope*co_wrk_aux(SensorXX) 
@@ -148,16 +160,12 @@ def generate_reference(df):
     df["co_wrk_aux_ref_mean"] = df.groupby("Node ID")["co_wrk_aux_ref"].transform("mean")
     return df
 
-# main_df = generate_reference(main_df)
-# print(main_df)
        
 def apply_filters(df):
     df = df[df["temp"] < 30]
     df = df[df["co_wrk_aux_ref"] < 10*df["co_wrk_aux_ref_mean"]]
     return df
 
-# main_df = apply_filters(main_df)
-# print(main_df)
 
 def generate_correction(df):
     #what is sensorXX_BME?
@@ -165,21 +173,21 @@ def generate_correction(df):
     df["CO_ppb"] = df.apply(lambda row: B0 + A1*row["temp"] + A2*row["co_wrk_aux_ref"] + A3*row["co_wrk_aux_ref"]*row["temp"], axis=1)
     return df
 
-# main_df = generate_correction(main_df)
-# print(main_df)
 
-#save the data to a csv file
-# main_df.to_csv("corrected_co.csv")
+##### Generating the final data
+
+main_df = generate_reference(main_df)
+print(main_df)
+main_df = apply_filters(main_df)
+print(main_df)
+main_df = generate_correction(main_df)
+
+#### cleaning and converting to csv 
+
+print(main_df.columns)
+
+main_df = main_df.drop(columns=['Slope', 'R2', 'Intercept',"Ref Dates", "Sensor"])
 
 
-# plot time and calibrated co
-# plt.plot(main_df["datetime"], main_df["CO_ppb"])
+main_df.to_csv("corrected_co.csv")
 
-
-
-### Apply filters
-## Temp(SensorXX) < 30 deg-C 
-##co_wrk_aux_ref(SensorXX) < 10*co_wrk_aux_ref_mean(SensorXX) 
-
-
-##CO_ppb(SensorXX) = B0 + A1*temp(SensorXX_BME) + A2*co_wrk_ref + A3*co_wrk_ref(SensorXX)*temp(SensorXX_BME) 

@@ -1,0 +1,26 @@
+Sensor,Node ID,Location,Name,Intercept,Slope,R2,Ref Dates
+1,250,Myron J. Francis Elementary,Myron%20J.%20Francis%20Elementary,1,1,1,NA
+2,254,Silver Lake Residence,Silver%Lake%Residence,-0.01148,0.963031,0.986901,9/20 - 10/20
+3,258,Reservior Ave Elementary,Reservoir%Ave%Elementary,0.020827,0.994761,0.961221,8/10 - 8/24
+4,261,Anthony Carnevale Elementary,Anthony%Carnevale%Elementary,0.010108,0.942156,0.985081,9/6 - 9/20
+5,264,E-Cubed Academy Senior High,E-Cubed%20Academy%20Senior%20High,-0.00366,0.936169,0.947217,8/10 - 8/24
+6,267,Rochambeau Library,Rochambeau%Library,0.008414,0.899201,0.90701,7/26 - 8/10
+7,270,Smith Hill Library,Smith%Hill%Library,0.002774,0.876983,0.856395,7/26 - 8/10
+8,274,Alpert Medical School,Alpert%Medical%School,0.003524,0.864249,0.986234,7/11 - 7/26
+9,276,Department of Public Works,Department%of%Public%Works,0.006231,0.81435,0.901831,7/11 - 7/26
+10,251,Zuccolo Recreation Center,Zuccolo%20Recreation%20Center,0.010108,0.942156,0.985081,9/6 - 9/20
+11,252,West End Community Center,West%End%Community%Center,-0.00518,0.825473,0.921934,7/11 - 7/26
+12,255,United Way,United%Way,-0.01095,1.04145,0.936011,8/24 - 9/6
+13,257,Providence Housing Authority  ,Providence%Housing%Association,0.011936,0.783855,0.899916,7/11 - 7/26
+14,259,CCRI - Liston Campus,CCRI%20-%20Liston%20Campus,-0.01222,0.8497,0.979259,8/10 - 8/24
+15,262,Main Street Martial Arts,Main%20Street%20Martial%20Arts,0.019776,0.893879,0.965748,9/6 - 9/20
+16,263,South Providence Library,South%Providence%Library,0.008135,0.90322,0.969275,7/26 - 8/10
+17,266,Blackstone Residence,,-0.04802,1.012799,0.864509,7/26 - 8/10
+18,269,Brown-Fox Point Early Childhood Education Center,Brown-Fox%20Point%20Early%20Childhood%20Education%20Center,-0.04145,0.925804,0.968609,8/10 - 8/24
+19,268,Rock Spot,Rock%20Spot,-0.02123,0.989605,0.952424,8/24 - 9/6
+20,,,,-0.0096,0.937365,0.982916,9/6 - 9/20
+21,,,,0.011702,0.898481,0.96936,8/24 - 9/6
+22,,,,-0.02868,1.148184,0.965125,9/20 - 10/20
+23,,,,-0.00064,1.000242,0.977696,9/20 - 10/20
+24,,,,-0.03092,0.976573,0.975379,9/20 - 10/20
+25,,,,0.011757,0.901792,0.930497,8/24 - 9/6
