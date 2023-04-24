@@ -102,7 +102,7 @@ def clean_data(data):
 
   #remove missing data, -999
   data = data.replace({'co_wrk_aux': {-999.00000: np.NaN}})
-  data = data.dropna(subset=['local_timestamp', 'co_wrk_aux'])
+  data = data.dropna(subset=['local_timestamp', 'co_wrk_aux',"temp"])
 
   #TODO: not best practice, check if it's working
   # change time zones 
@@ -139,11 +139,13 @@ ref_df["Node ID"] = ref_df["Node ID"].astype(int)
 print(data_df)
 data_df = clean_data(data_df)
 
+### 
+data_df.to_csv("uncorrected_co.csv")
+
 
 
 #merge the data with the reference to get lookup values
 main_df = pd.merge(ref_df, data_df, on='Node ID')
-main_df.to_csv("main_df.csv")
 
 #main_df = main_df.to_frame()
 print("this is the tpe for main_df")
