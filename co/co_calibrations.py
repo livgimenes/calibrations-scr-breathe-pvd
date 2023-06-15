@@ -104,7 +104,10 @@ def clean_data(data):
   data = data.rename(columns={"node_id": "Node ID"})
 
   #Currently drops rows with missing data
-  data = data.replace({'co_wrk_aux': {-999.00000: np.NaN}})
+  data = data.replace({'co_wrk_aux': {-999: np.NaN}})
+
+  # filter out negative values
+  data = data[data['co_wrk_aux'] >= 0]
   data = data.dropna(subset=['local_timestamp', 'co_wrk_aux',"temp"])
 
   #turn the Node ID into a string
@@ -118,8 +121,6 @@ def clean_data(data):
 
   return data
 
-
-### For every sensor generate:  co_wrk_aux_ref(SensorXX) = $intercept$ + $slope*co_wrk_aux(SensorXX) 
 def generate_reference(df):
 
     #This generates the co_wrk_aux_ref column
@@ -133,12 +134,16 @@ def generate_reference(df):
        # filter the dataframe to only include reading from that node 
         node_df = df[df["Node ID"] == node]
 
+
        # get the mean of co_wrk_aux_ref for that node
         mean = node_df["co_wrk_aux_ref"].mean()
-        print(mean)
+        if node == 250:
+            print(mean)
 
+    
        # for all of the rows in the dataframe that have that node, set that df["co_wrk_aux_ref_mean"] as that mean value
         df.loc[df["Node ID"] == node, "co_wrk_aux_ref_mean"] = mean
+
     
     return df
 
@@ -164,8 +169,12 @@ def generate_final_corrections():
     #Getting the time ranges(September 1st 2022 to current time)
     curr_time = est_to_pst(datetime.datetime.now())
     curr_time = curr_time.replace(minute=0, second=0, microsecond=0)
-    end_date = str(curr_time)[0:10]
-    end_time = str(curr_time)[11:19] 
+    # end_date = str(curr_time)[0:10]
+    # end_time = str(curr_time)[11:19] 
+    end_date = "2023-3-1"
+    end_time = "00:00:00"
+
+
     start_date = "2022-9-1"
     start_time = "00:00:00"
     variable = "co_wrk_aux,temp"
@@ -202,4 +211,7 @@ def generate_final_corrections():
 
 
 generate_final_corrections()
+
+
+
 
