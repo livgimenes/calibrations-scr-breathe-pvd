@@ -171,6 +171,9 @@ def generate_final_corrections():
     curr_time = curr_time.replace(minute=0, second=0, microsecond=0)
     # end_date = str(curr_time)[0:10]
     # end_time = str(curr_time)[11:19] 
+
+
+    #NOTE: Currently using March 1st 2023 as the end dates
     end_date = "2023-3-1"
     end_time = "00:00:00"
 
