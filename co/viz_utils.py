@@ -36,6 +36,34 @@ def make_scatter_plot(data,title):
     plt.show()
 
 
+def make_timeseries_general(dataframe,name):
+    dataframe['timestamp'] = pd.to_datetime(dataframe['timestamp'])
+
+    plt.plot(dataframe["timestamp"],dataframe["CO_ppb"])
+    plt.xlabel('Time')
+    plt.ylabel('CO Concentration')
+    plt.ylim(0, 5)
+
+    plt.title(name + ' :Time versus CO Concentration')
+    plt.show()
+
+
+import matplotlib.dates as mdates
+
+def make_timeseries_specific(dataframe,name):
+    dataframe['timestamp'] = pd.to_datetime(dataframe['timestamp'])
+
+    fig, ax = plt.subplots()
+    ax.plot(dataframe['timestamp'],dataframe['CO_ppb'])
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    fig.autofmt_xdate()
+
+    ax.set_xlabel('Time')
+    ax.set_ylabel('CO Concentration')
+
+    ax.set_title(name + ' :Time versus CO Concentration')
+    plt.show()
+
 
 
 
