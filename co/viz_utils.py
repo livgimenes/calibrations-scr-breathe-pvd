@@ -30,7 +30,7 @@ def make_scatter_plot(data,title):
     # add labels and title
     plt.xlabel('Temperature')
     plt.ylabel('CO (ppb)')
-    plt.title(title + ': Temperature vs.s CO')
+    plt.title(title + ': Temperature vs CO')
 
     # display the plot
     plt.show()
